@@ -1,19 +1,21 @@
-module Admin
- 
-  def self.admin_types
-    ['AdminUser']
-  end
-   
+class ApplicationController < ActionController::Base
+  include Pundit
+  # Prevent CSRF attacks by raising an exception.
+  # For APIs, you may want to use :null_session instead.
+  protect_from_forgery with: :exception
+  before_action :authenticate_user!
 
-  class ApplicationController < Administrate::ApplicationController
-    before_action :authenticate_user!
-    before_action :authenticate_admin
+  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
-    def authenticate_admin
-      unless Admin.admin_types.include?(current_user.try(:type))
-        flash[:alert] = "You are not authorized to access this page."
-        redirect_to(root_path)
-      end
-    end
+  private
+
+  def user_not_authorized
+    flash[:alert] = "You are not authorized to perform this action."
+    redirect_to(root_path)
   end
 end
+
+
+
+
+ 
